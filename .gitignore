@@ -1,0 +1,8 @@
+# Build and IDE directories
+build/
+.qtcreator/
+CMakeLists.txt.user*
+*.user
+*.autosave
+.DS_Store
+Thumbs.db

@@ -1,0 +1,1385 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1280</width>
+    <height>720</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1200</width>
+    <height>680</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>CAPSULE INSPECTION SYSTEM - Yapay Zeka Destekli Kapsül Kalite Kontrolü</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">/* Ana Pencere ve Genel Tema */
+QMainWindow, QWidget#centralwidget {
+    background-color: #0b1320;
+    color: #e2e8f0;
+    font-family: &quot;Segoe UI&quot;, &quot;Roboto&quot;, sans-serif;
+}
+
+/* Ana Paneller */
+QFrame#headerFrame,
+QFrame#panelLiveVision,
+QFrame#panelAiAnalysis,
+QFrame#panelCounters,
+QFrame#panelHardwareStatus,
+QFrame#panelOperatorControls {
+    background-color: #142034;
+    border: 1px solid #1e3250;
+    border-radius: 8px;
+}
+
+/* Alt Gruplar */
+QFrame#subGroupCamera,
+QFrame#subGroupCalibration {
+    background-color: #0f192a;
+    border: 1px solid #1e3250;
+    border-radius: 6px;
+}
+
+/* Başlık Etiketleri */
+QLabel#lblHeaderTitle {
+    color: #f8fafc;
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+QLabel#lblHeaderSubtitle {
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+QLabel#lblSystemStatus {
+    color: #22c55e;
+    background-color: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    border-radius: 12px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+QLabel#lblDateTime {
+    color: #cbd5e1;
+    background-color: #0f192a;
+    border: 1px solid #1e3250;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Panel Başlıkları */
+QLabel#lblTitleLiveVision,
+QLabel#lblTitleAiAnalysis,
+QLabel#lblTitleCounters,
+QLabel#lblTitleHardware,
+QLabel#lblTitleOperator {
+    color: #f1f5f9;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+QLabel#lblSubTitleCamera,
+QLabel#lblSubTitleCalibration {
+    color: #cbd5e1;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* Görüntü Alanları */
+QLabel#lblCameraFeed,
+QLabel#lblHeatmapFeed {
+    background-color: #070c15;
+    border: 1px solid #1e3250;
+    border-radius: 6px;
+    color: #64748b;
+}
+
+QLabel#lblCameraStatus {
+    color: #38bdf8;
+    background-color: #0b1320;
+    border: 1px solid #1e3250;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+/* Isı Haritası Uyarı Kutusu */
+QFrame#frameAnomalyAlert {
+    background-color: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.45);
+    border-radius: 6px;
+}
+
+QLabel#lblAnomalyTitle {
+    color: #f87171;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+QLabel#lblAnomalyType {
+    color: #e2e8f0;
+    font-size: 12px;
+}
+
+QLabel#lblAnomalyConfidence {
+    color: #fca5a5;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* Üretim Sayaç Kartları */
+QFrame#cardAccepted {
+    background-color: rgba(22, 163, 74, 0.14);
+    border: 1px solid #16a34a;
+    border-radius: 8px;
+}
+
+QLabel#lblAcceptedTitle {
+    color: #86efac;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+QLabel#lblAcceptedCount {
+    color: #4ade80;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+QFrame#cardRejected {
+    background-color: rgba(220, 38, 38, 0.14);
+    border: 1px solid #dc2626;
+    border-radius: 8px;
+}
+
+QLabel#lblRejectedTitle {
+    color: #fca5a5;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+QLabel#lblRejectedCount {
+    color: #f87171;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+QFrame#cardErrorRate {
+    background-color: rgba(56, 189, 248, 0.12);
+    border: 1px solid #0284c7;
+    border-radius: 8px;
+}
+
+QLabel#lblErrorRateTitle {
+    color: #7dd3fc;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+QLabel#lblErrorRate {
+    color: #38bdf8;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+/* ComboBox Tasarımı */
+QComboBox {
+    background-color: #0b1320;
+    border: 1px solid #2b4468;
+    border-radius: 5px;
+    padding: 4px 10px;
+    color: #e2e8f0;
+    font-size: 12px;
+}
+
+QComboBox:hover {
+    border: 1px solid #38bdf8;
+}
+
+QComboBox::drop-down {
+    border: none;
+    width: 20px;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #142034;
+    border: 1px solid #2b4468;
+    selection-background-color: #1e3250;
+    color: #e2e8f0;
+}
+
+/* Buton Tasarımları */
+QPushButton {
+    background-color: #1e3250;
+    border: 1px solid #2b4468;
+    border-radius: 5px;
+    color: #f1f5f9;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+QPushButton:hover {
+    background-color: #29436b;
+    border: 1px solid #38bdf8;
+}
+
+QPushButton:pressed {
+    background-color: #152338;
+}
+
+QPushButton#btnConnectSerial {
+    background-color: #0284c7;
+    border: 1px solid #38bdf8;
+    color: #ffffff;
+}
+
+QPushButton#btnConnectSerial:hover {
+    background-color: #0369a1;
+}
+
+QPushButton#btnStart {
+    background-color: #16a34a;
+    border: 1px solid #22c55e;
+    color: #ffffff;
+    font-size: 14px;
+    padding: 10px 16px;
+}
+
+QPushButton#btnStart:hover {
+    background-color: #15803d;
+}
+
+QPushButton#btnEmergencyStop {
+    background-color: #dc2626;
+    border: 1px solid #ef4444;
+    color: #ffffff;
+    font-size: 14px;
+    padding: 10px 16px;
+}
+
+QPushButton#btnEmergencyStop:hover {
+    background-color: #b91c1c;
+}
+
+QPushButton#btnResetCounters {
+    background-color: #334155;
+    border: 1px solid #475569;
+    color: #f1f5f9;
+    font-size: 14px;
+    padding: 10px 16px;
+}
+
+QPushButton#btnResetCounters:hover {
+    background-color: #475569;
+}
+
+QPushButton#btnCalibrate {
+    background-color: #2563eb;
+    border: 1px solid #3b82f6;
+    color: #ffffff;
+}
+
+QPushButton#btnCalibrate:hover {
+    background-color: #1d4ed8;
+}
+
+QPushButton#btnTestAccept {
+    background-color: rgba(22, 163, 74, 0.25);
+    border: 1px solid #22c55e;
+    color: #4ade80;
+}
+
+QPushButton#btnTestAccept:hover {
+    background-color: rgba(22, 163, 74, 0.45);
+}
+
+QPushButton#btnTestReject {
+    background-color: rgba(220, 38, 38, 0.25);
+    border: 1px solid #ef4444;
+    color: #f87171;
+}
+
+QPushButton#btnTestReject:hover {
+    background-color: rgba(220, 38, 38, 0.45);
+}
+
+/* Slider Tasarımı */
+QSlider::groove:horizontal {
+    border: 1px solid #1e3250;
+    height: 6px;
+    background: #0b1320;
+    border-radius: 3px;
+}
+
+QSlider::sub-page:horizontal {
+    background: #0284c7;
+    border-radius: 3px;
+}
+
+QSlider::handle:horizontal {
+    background: #38bdf8;
+    border: 1px solid #0284c7;
+    width: 14px;
+    margin-top: -5px;
+    margin-bottom: -5px;
+    border-radius: 7px;
+}
+
+QSlider::handle:horizontal:hover {
+    background: #7dd3fc;
+}
+</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="mainVerticalLayout" stretch="0,3,2">
+    <property name="spacing">
+     <number>10</number>
+    </property>
+    <property name="leftMargin">
+     <number>12</number>
+    </property>
+    <property name="topMargin">
+     <number>10</number>
+    </property>
+    <property name="rightMargin">
+     <number>12</number>
+    </property>
+    <property name="bottomMargin">
+     <number>10</number>
+    </property>
+    <!-- ÜST BAR (Header) -->
+    <item>
+     <widget class="QFrame" name="headerFrame">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>64</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>68</height>
+       </size>
+      </property>
+      <layout class="QHBoxLayout" name="headerLayout">
+       <property name="leftMargin">
+        <number>16</number>
+       </property>
+       <property name="topMargin">
+        <number>8</number>
+       </property>
+       <property name="rightMargin">
+        <number>16</number>
+       </property>
+       <property name="bottomMargin">
+        <number>8</number>
+       </property>
+       <item>
+        <layout class="QVBoxLayout" name="headerTitleLayout">
+         <property name="spacing">
+          <number>2</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="lblHeaderTitle">
+           <property name="text">
+            <string>CAPSULE INSPECTION SYSTEM</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="lblHeaderSubtitle">
+           <property name="text">
+            <string>Yapay Zeka Destekli Kapsül Kalite Kontrolü</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="headerSpacer">
+         <property name="orientation">
+          <enum>Qt::Orientation::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="lblSystemStatus">
+         <property name="text">
+          <string>● Sistem Aktif</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="lblDateTime">
+         <property name="text">
+          <string>25.10.2026 | 18:45:00</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <!-- ÜST PANELLER SATIRI (Kamera, Yapay Zeka Isı Haritası, Üretim Sayaçları) -->
+    <item>
+     <layout class="QHBoxLayout" name="topRowLayout" stretch="5,4,3">
+      <property name="spacing">
+       <number>10</number>
+      </property>
+      <!-- SOL ÜST PANEL: Ana Kamera Akışı (Live Vision) -->
+      <item>
+       <widget class="QFrame" name="panelLiveVision">
+        <layout class="QVBoxLayout" name="liveVisionLayout" stretch="0,1,0">
+         <property name="spacing">
+          <number>8</number>
+         </property>
+         <property name="leftMargin">
+          <number>12</number>
+         </property>
+         <property name="topMargin">
+          <number>10</number>
+         </property>
+         <property name="rightMargin">
+          <number>12</number>
+         </property>
+         <property name="bottomMargin">
+          <number>10</number>
+         </property>
+         <item>
+          <layout class="QHBoxLayout" name="liveVisionHeaderLayout">
+           <item>
+            <widget class="QLabel" name="lblTitleLiveVision">
+             <property name="text">
+              <string>Ana Kamera Akışı (Live Vision)</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="liveVisionHeaderSpacer">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QComboBox" name="cmbCamera">
+             <property name="minimumSize">
+              <size>
+               <width>140</width>
+               <height>26</height>
+              </size>
+             </property>
+             <item>
+              <property name="text">
+               <string>USB Webcam</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Endüstriyel GigE Kamera</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Simülasyon Akışı</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QLabel" name="lblCameraFeed">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>380</width>
+             <height>240</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Kamera Görüntüsü Yükleniyor...</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="lblCameraStatus">
+           <property name="text">
+            <string>● LIVE | 1920 x 1080 | 30 FPS</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <!-- ORTA ÜST PANEL: Yapay Zeka Isı Haritası (AI Analysis) -->
+      <item>
+       <widget class="QFrame" name="panelAiAnalysis">
+        <layout class="QVBoxLayout" name="aiAnalysisLayout" stretch="0,1,0">
+         <property name="spacing">
+          <number>8</number>
+         </property>
+         <property name="leftMargin">
+          <number>12</number>
+         </property>
+         <property name="topMargin">
+          <number>10</number>
+         </property>
+         <property name="rightMargin">
+          <number>12</number>
+         </property>
+         <property name="bottomMargin">
+          <number>10</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="lblTitleAiAnalysis">
+           <property name="text">
+            <string>Yapay Zeka Isı Haritası (AI Analysis)</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="heatmapCenterLayout" stretch="1,0">
+           <property name="spacing">
+            <number>8</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="lblHeatmapFeed">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>260</width>
+               <height>190</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>AI Isı Haritası</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QFrame" name="frameColorScale">
+             <property name="minimumSize">
+              <size>
+               <width>48</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>54</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <layout class="QVBoxLayout" name="colorScaleLayout">
+              <property name="spacing">
+               <number>4</number>
+              </property>
+              <property name="leftMargin">
+               <number>2</number>
+              </property>
+              <property name="topMargin">
+               <number>2</number>
+              </property>
+              <property name="rightMargin">
+               <number>2</number>
+              </property>
+              <property name="bottomMargin">
+               <number>2</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="lblScaleHot">
+                <property name="styleSheet">
+                 <string notr="true">color: #f87171; font-size: 10px; font-weight: bold;</string>
+                </property>
+                <property name="text">
+                 <string>Sıcak</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="lblColorScaleBar">
+                <property name="minimumSize">
+                 <size>
+                  <width>20</width>
+                  <height>120</height>
+                 </size>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #ef4444, stop:0.35 #f59e0b, stop:0.65 #10b981, stop:1 #1d4ed8); border: 1px solid #2b4468; border-radius: 4px;</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="lblScaleCold">
+                <property name="styleSheet">
+                 <string notr="true">color: #38bdf8; font-size: 10px; font-weight: bold;</string>
+                </property>
+                <property name="text">
+                 <string>Soğuk</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignmentFlag::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QFrame" name="frameAnomalyAlert">
+           <layout class="QVBoxLayout" name="anomalyAlertLayout">
+            <property name="spacing">
+             <number>2</number>
+            </property>
+            <property name="leftMargin">
+             <number>10</number>
+            </property>
+            <property name="topMargin">
+             <number>6</number>
+            </property>
+            <property name="rightMargin">
+             <number>10</number>
+            </property>
+            <property name="bottomMargin">
+             <number>6</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="lblAnomalyTitle">
+              <property name="text">
+               <string>⚠ Anomali Tespit Edildi</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="anomalyDetailLayout">
+              <item>
+               <widget class="QLabel" name="lblAnomalyType">
+                <property name="text">
+                 <string>Tür: Çapak / Kırık (Tahmini)</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="lblAnomalyConfidence">
+                <property name="text">
+                 <string>Güven Skoru: %96.3</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <!-- SAĞ ÜST PANEL: Üretim Sayaçları -->
+      <item>
+       <widget class="QFrame" name="panelCounters">
+        <layout class="QVBoxLayout" name="countersLayout" stretch="0,1,1,1">
+         <property name="spacing">
+          <number>10</number>
+         </property>
+         <property name="leftMargin">
+          <number>12</number>
+         </property>
+         <property name="topMargin">
+          <number>10</number>
+         </property>
+         <property name="rightMargin">
+          <number>12</number>
+         </property>
+         <property name="bottomMargin">
+          <number>10</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="lblTitleCounters">
+           <property name="text">
+            <string>Üretim Sayaçları</string>
+           </property>
+          </widget>
+         </item>
+         <!-- Kabul Edilen Kartı -->
+         <item>
+          <widget class="QFrame" name="cardAccepted">
+           <layout class="QVBoxLayout" name="cardAcceptedLayout">
+            <property name="spacing">
+             <number>4</number>
+            </property>
+            <property name="leftMargin">
+             <number>14</number>
+            </property>
+            <property name="topMargin">
+             <number>8</number>
+            </property>
+            <property name="rightMargin">
+             <number>14</number>
+            </property>
+            <property name="bottomMargin">
+             <number>8</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="lblAcceptedTitle">
+              <property name="text">
+               <string>Kabul Edilen</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="lblAcceptedCount">
+              <property name="text">
+               <string>0</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <!-- Reddedilen Kartı -->
+         <item>
+          <widget class="QFrame" name="cardRejected">
+           <layout class="QVBoxLayout" name="cardRejectedLayout">
+            <property name="spacing">
+             <number>4</number>
+            </property>
+            <property name="leftMargin">
+             <number>14</number>
+            </property>
+            <property name="topMargin">
+             <number>8</number>
+            </property>
+            <property name="rightMargin">
+             <number>14</number>
+            </property>
+            <property name="bottomMargin">
+             <number>8</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="lblRejectedTitle">
+              <property name="text">
+               <string>Reddedilen</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="lblRejectedCount">
+              <property name="text">
+               <string>0</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <!-- Anlık Hata Oranı Kartı -->
+         <item>
+          <widget class="QFrame" name="cardErrorRate">
+           <layout class="QVBoxLayout" name="cardErrorRateLayout">
+            <property name="spacing">
+             <number>4</number>
+            </property>
+            <property name="leftMargin">
+             <number>14</number>
+            </property>
+            <property name="topMargin">
+             <number>8</number>
+            </property>
+            <property name="rightMargin">
+             <number>14</number>
+            </property>
+            <property name="bottomMargin">
+             <number>8</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="lblErrorRateTitle">
+              <property name="text">
+               <string>Anlık Hata Oranı</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="lblErrorRate">
+              <property name="text">
+               <string>%0.0</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <!-- ALT PANELLER SATIRI (Donanım Durumu ve Operatör Kontrolleri) -->
+    <item>
+     <layout class="QHBoxLayout" name="bottomRowLayout" stretch="5,7">
+      <property name="spacing">
+       <number>10</number>
+      </property>
+      <!-- SOL ALT PANEL: Donanım ve Haberleşme Durumu -->
+      <item>
+       <widget class="QFrame" name="panelHardwareStatus">
+        <layout class="QVBoxLayout" name="hardwareLayout">
+         <property name="spacing">
+          <number>8</number>
+         </property>
+         <property name="leftMargin">
+          <number>14</number>
+         </property>
+         <property name="topMargin">
+          <number>10</number>
+         </property>
+         <property name="rightMargin">
+          <number>14</number>
+         </property>
+         <property name="bottomMargin">
+          <number>10</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="lblTitleHardware">
+           <property name="text">
+            <string>Donanım ve Haberleşme Durumu</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="serialPortRowLayout" stretch="0,1,0,0">
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="lblComPortLabel">
+             <property name="styleSheet">
+              <string notr="true">color: #94a3b8; font-size: 12px; font-weight: bold;</string>
+             </property>
+             <property name="text">
+              <string>COM Port:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="cmbComPort">
+             <property name="minimumSize">
+              <size>
+               <width>120</width>
+               <height>28</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnRefreshPorts">
+             <property name="text">
+              <string>Yenile</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnConnectSerial">
+             <property name="text">
+              <string>Bağlan</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QGridLayout" name="hardwareStatusGridLayout">
+           <property name="horizontalSpacing">
+            <number>12</number>
+           </property>
+           <property name="verticalSpacing">
+            <number>6</number>
+           </property>
+           <item row="0" column="0">
+            <widget class="QLabel" name="lblKeyArduino">
+             <property name="styleSheet">
+              <string notr="true">color: #94a3b8; font-size: 12px;</string>
+             </property>
+             <property name="text">
+              <string>Arduino:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLabel" name="lblArduinoStatus">
+             <property name="styleSheet">
+              <string notr="true">color: #f87171; font-size: 12px; font-weight: bold;</string>
+             </property>
+             <property name="text">
+              <string>Bağlı Değil</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="lblKeyMotor">
+             <property name="styleSheet">
+              <string notr="true">color: #94a3b8; font-size: 12px;</string>
+             </property>
+             <property name="text">
+              <string>Motor Durumu:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLabel" name="lblMotorStatus">
+             <property name="styleSheet">
+              <string notr="true">color: #4ade80; font-size: 12px; font-weight: bold;</string>
+             </property>
+             <property name="text">
+              <string>Hazır</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="lblKeyInference">
+             <property name="styleSheet">
+              <string notr="true">color: #94a3b8; font-size: 12px;</string>
+             </property>
+             <property name="text">
+              <string>Çıkarım Hızı:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QLabel" name="lblInferenceSpeed">
+             <property name="styleSheet">
+              <string notr="true">color: #38bdf8; font-size: 12px; font-weight: bold;</string>
+             </property>
+             <property name="text">
+              <string>12 ms</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="lblKeySensor">
+             <property name="styleSheet">
+              <string notr="true">color: #94a3b8; font-size: 12px;</string>
+             </property>
+             <property name="text">
+              <string>Sensör:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QLabel" name="lblSensorStatus">
+             <property name="styleSheet">
+              <string notr="true">color: #fbbf24; font-size: 12px; font-weight: bold;</string>
+             </property>
+             <property name="text">
+              <string>Bekleniyor...</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="lblKeyCameraHw">
+             <property name="styleSheet">
+              <string notr="true">color: #94a3b8; font-size: 12px;</string>
+             </property>
+             <property name="text">
+              <string>Kamera:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QLabel" name="lblCameraHwStatus">
+             <property name="styleSheet">
+              <string notr="true">color: #4ade80; font-size: 12px; font-weight: bold;</string>
+             </property>
+             <property name="text">
+              <string>Bağlı</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <!-- SAĞ ALT PANEL: Operatör Kontrolleri -->
+      <item>
+       <widget class="QFrame" name="panelOperatorControls">
+        <layout class="QVBoxLayout" name="operatorLayout" stretch="0,0,1">
+         <property name="spacing">
+          <number>10</number>
+         </property>
+         <property name="leftMargin">
+          <number>14</number>
+         </property>
+         <property name="topMargin">
+          <number>10</number>
+         </property>
+         <property name="rightMargin">
+          <number>14</number>
+         </property>
+         <property name="bottomMargin">
+          <number>10</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="lblTitleOperator">
+           <property name="text">
+            <string>Operatör Kontrolleri</string>
+           </property>
+          </widget>
+         </item>
+         <!-- Üst Sıra: 3 Büyük Buton -->
+         <item>
+          <layout class="QHBoxLayout" name="operatorMainButtonsLayout">
+           <property name="spacing">
+            <number>10</number>
+           </property>
+           <item>
+            <widget class="QPushButton" name="btnStart">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>42</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>▶ Başlat</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnEmergencyStop">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>42</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>■ Acil Durdurma</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnResetCounters">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>42</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>↻ Sayaçları Sıfırla</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <!-- Alt Sıra: Kamera Ayarları ve Kalibrasyon/Manuel Test -->
+         <item>
+          <layout class="QHBoxLayout" name="operatorSubGroupsLayout" stretch="1,1">
+           <property name="spacing">
+            <number>10</number>
+           </property>
+           <!-- Sol Alt Alt-Grup: Kamera Ayarları -->
+           <item>
+            <widget class="QFrame" name="subGroupCamera">
+             <layout class="QVBoxLayout" name="cameraSettingsLayout">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <property name="leftMargin">
+               <number>12</number>
+              </property>
+              <property name="topMargin">
+               <number>8</number>
+              </property>
+              <property name="rightMargin">
+               <number>12</number>
+              </property>
+              <property name="bottomMargin">
+               <number>8</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="lblSubTitleCamera">
+                <property name="text">
+                 <string>Kamera Ayarları</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QGridLayout" name="cameraSlidersGridLayout">
+                <property name="horizontalSpacing">
+                 <number>10</number>
+                </property>
+                <property name="verticalSpacing">
+                 <number>8</number>
+                </property>
+                <item row="0" column="0">
+                 <widget class="QLabel" name="lblBrightnessTitle">
+                  <property name="styleSheet">
+                   <string notr="true">color: #94a3b8; font-size: 12px;</string>
+                  </property>
+                  <property name="text">
+                   <string>Parlaklık:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QSlider" name="sliderBrightness">
+                  <property name="minimum">
+                   <number>-100</number>
+                  </property>
+                  <property name="maximum">
+                   <number>100</number>
+                  </property>
+                  <property name="value">
+                   <number>50</number>
+                  </property>
+                  <property name="orientation">
+                   <enum>Qt::Orientation::Horizontal</enum>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="2">
+                 <widget class="QLabel" name="lblBrightnessValue">
+                  <property name="minimumSize">
+                   <size>
+                    <width>32</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">color: #38bdf8; font-size: 12px; font-weight: bold;</string>
+                  </property>
+                  <property name="text">
+                   <string>50</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QLabel" name="lblExposureTitle">
+                  <property name="styleSheet">
+                   <string notr="true">color: #94a3b8; font-size: 12px;</string>
+                  </property>
+                  <property name="text">
+                   <string>Pozlama:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QSlider" name="sliderExposure">
+                  <property name="minimum">
+                   <number>-10</number>
+                  </property>
+                  <property name="maximum">
+                   <number>10</number>
+                  </property>
+                  <property name="value">
+                   <number>-6</number>
+                  </property>
+                  <property name="orientation">
+                   <enum>Qt::Orientation::Horizontal</enum>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="2">
+                 <widget class="QLabel" name="lblExposureValue">
+                  <property name="minimumSize">
+                   <size>
+                    <width>32</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">color: #38bdf8; font-size: 12px; font-weight: bold;</string>
+                  </property>
+                  <property name="text">
+                   <string>-6</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <!-- Sağ Alt Alt-Grup: Kalibrasyon ve Manuel Test -->
+           <item>
+            <widget class="QFrame" name="subGroupCalibration">
+             <layout class="QVBoxLayout" name="calibrationLayout">
+              <property name="spacing">
+               <number>8</number>
+              </property>
+              <property name="leftMargin">
+               <number>12</number>
+              </property>
+              <property name="topMargin">
+               <number>8</number>
+              </property>
+              <property name="rightMargin">
+               <number>12</number>
+              </property>
+              <property name="bottomMargin">
+               <number>8</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="lblSubTitleCalibration">
+                <property name="text">
+                 <string>Kalibrasyon ve Manuel Test</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btnCalibrate">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>32</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>⊕ Kalibre Et</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="manualTestButtonsLayout">
+                <property name="spacing">
+                 <number>8</number>
+                </property>
+                <item>
+                 <widget class="QPushButton" name="btnTestAccept">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>32</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>Kabul Test (GREEN)</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="btnTestReject">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>32</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>Red Test (RED - 45°)</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
