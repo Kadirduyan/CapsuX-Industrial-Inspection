@@ -2,6 +2,7 @@
 #include "./ui_mainwindow.h"
 
 #include <QDateTime>
+#include <QImage>
 #include <QPainter>
 #include <QPainterPath>
 #include <QPixmap>
@@ -14,6 +15,8 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+    , cap()
+    , kameraTimer(new QTimer(this))
     , m_serialPort(new QSerialPort(this))
     , m_clockTimer(new QTimer(this))
     , m_sensorResetTimer(new QTimer(this))
@@ -22,6 +25,33 @@ MainWindow::MainWindow(QWidget *parent)
     , m_currentDefectState(true)
 {
     ui->setupUi(this);
+
+    // Kamera seçim kutusunu (ComboBox) indekslerle yapılandır
+    ui->cmbCamera->blockSignals(true);
+    ui->cmbCamera->clear();
+    ui->cmbCamera->addItem(QStringLiteral("Harici USB Kamera (Kamera 1)"), 1);
+    ui->cmbCamera->addItem(QStringLiteral("Dahili Kamera (Kamera 0)"), 0);
+    ui->cmbCamera->addItem(QStringLiteral("Harici Kamera 2 (Kamera 2)"), 2);
+    ui->cmbCamera->addItem(QStringLiteral("Simülasyon Akışı"), -1);
+    ui->cmbCamera->blockSignals(false);
+
+    connect(kameraTimer, &QTimer::timeout, this, &MainWindow::kameraKaresiniGuncelle);
+    connect(ui->cmbCamera, &QComboBox::currentIndexChanged, this, &MainWindow::onCameraSelectionChanged);
+
+    // Öncelikle harici endüstriyel USB kamerayı (İndeks 1) açmayı dene, bulunamazsa İndeks 0'a geç
+    if (kamerayiAc(1)) {
+        ui->cmbCamera->blockSignals(true);
+        ui->cmbCamera->setCurrentIndex(0); // Harici USB Kamera (Kamera 1)
+        ui->cmbCamera->blockSignals(false);
+    } else if (kamerayiAc(0)) {
+        ui->cmbCamera->blockSignals(true);
+        ui->cmbCamera->setCurrentIndex(1); // Dahili Kamera (Kamera 0)
+        ui->cmbCamera->blockSignals(false);
+    } else {
+        ui->cmbCamera->blockSignals(true);
+        ui->cmbCamera->setCurrentIndex(3); // Simülasyon Akışı
+        ui->cmbCamera->blockSignals(false);
+    }
 
     // Canlı Tarih / Saat zamanlayıcısı (1 saniyede bir güncellenir)
     connect(m_clockTimer, &QTimer::timeout, this, &MainWindow::updateDateTime);
@@ -59,7 +89,7 @@ MainWindow::MainWindow(QWidget *parent)
     refreshSerialPorts();
     updateCountersUI();
 
-    // İlk açılışta görsel simülasyon akışlarını çiz
+    // İlk açılışta görsel akışları hazırla
     QTimer::singleShot(50, this, [this]() {
         renderVisionFeeds(m_currentDefectState);
     });
@@ -67,10 +97,103 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    if (kameraTimer->isActive()) {
+        kameraTimer->stop();
+    }
+    if (cap.isOpened()) {
+        cap.release();
+    }
     if (m_serialPort->isOpen()) {
         m_serialPort->close();
     }
     delete ui;
+}
+
+bool MainWindow::kamerayiAc(int cameraIndex)
+{
+    if (kameraTimer->isActive()) {
+        kameraTimer->stop();
+    }
+    if (cap.isOpened()) {
+        cap.release();
+    }
+
+    // Simülasyon modu seçildiyse fiziksel kamerayı kapat
+    if (cameraIndex < 0) {
+        ui->lblCameraHwStatus->setText(QStringLiteral("Simülasyon Modu"));
+        ui->lblCameraHwStatus->setStyleSheet(QStringLiteral("color: #38bdf8; font-size: 12px; font-weight: bold;"));
+        ui->lblCameraStatus->setText(QStringLiteral("● SIM | 1920 x 1080 | Yapay Zeka Simülasyon Akışı"));
+        renderVisionFeeds(m_currentDefectState);
+        return false;
+    }
+
+    // Windows'ta harici USB kameraların hızlı ve gecikmesiz açılması için önce DirectShow (CAP_DSHOW) dene
+    bool opened = cap.open(cameraIndex, cv::CAP_DSHOW);
+    if (!opened) {
+        opened = cap.open(cameraIndex, cv::CAP_ANY);
+    }
+
+    if (opened && cap.isOpened()) {
+        cap.set(cv::CAP_PROP_BUFFERSIZE, 1);
+        cap.set(cv::CAP_PROP_FRAME_WIDTH, 1280);
+        cap.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
+        cap.set(cv::CAP_PROP_FPS, 30);
+
+        ui->lblCameraHwStatus->setText(QStringLiteral("Bağlı (Kamera #%1)").arg(cameraIndex));
+        ui->lblCameraHwStatus->setStyleSheet(QStringLiteral("color: #4ade80; font-size: 12px; font-weight: bold;"));
+        ui->lblCameraStatus->setText(QStringLiteral("● LIVE | Kamera #%1 | 1280 x 720 | 30 FPS").arg(cameraIndex));
+        kameraTimer->start(30);
+        return true;
+    }
+
+    ui->lblCameraHwStatus->setText(QStringLiteral("Kamera #%1 Bulunamadı").arg(cameraIndex));
+    ui->lblCameraHwStatus->setStyleSheet(QStringLiteral("color: #fbbf24; font-size: 12px; font-weight: bold;"));
+    ui->lblCameraStatus->setText(QStringLiteral("● UYARI | Kamera #%1 Açılamadı (Simülasyon Aktif)").arg(cameraIndex));
+    renderVisionFeeds(m_currentDefectState);
+    return false;
+}
+
+void MainWindow::onCameraSelectionChanged(int comboIndex)
+{
+    if (comboIndex < 0) {
+        return;
+    }
+    const int cameraIndex = ui->cmbCamera->itemData(comboIndex).toInt();
+    kamerayiAc(cameraIndex);
+}
+
+void MainWindow::kameraKaresiniGuncelle()
+{
+    if (!cap.isOpened()) {
+        return;
+    }
+
+    cv::Mat frame;
+    cap >> frame;
+    if (frame.empty()) {
+        // Hata toleransı (Fail-safe): Kamera bağlantısı aniden koparsa çökme, uyarı ver ve simülasyona geç
+        kameraTimer->stop();
+        cap.release();
+        ui->lblCameraHwStatus->setText(QStringLiteral("Bağlantı Koptu! (Fail-Safe)"));
+        ui->lblCameraHwStatus->setStyleSheet(QStringLiteral("color: #f87171; font-size: 12px; font-weight: bold;"));
+        renderVisionFeeds(m_currentDefectState);
+        return;
+    }
+
+    cv::Mat rgbFrame;
+    cv::cvtColor(frame, rgbFrame, cv::COLOR_BGR2RGB);
+
+    const QImage qimg(rgbFrame.data,
+                      rgbFrame.cols,
+                      rgbFrame.rows,
+                      static_cast<int>(rgbFrame.step.p[0]),
+                      QImage::Format_RGB888);
+
+    ui->lblCameraFeed->setPixmap(
+        QPixmap::fromImage(qimg).scaled(
+            ui->lblCameraFeed->size(),
+            Qt::KeepAspectRatio,
+            Qt::SmoothTransformation));
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)
@@ -250,6 +373,9 @@ void MainWindow::updateCountersUI()
 void MainWindow::onStartClicked()
 {
     sendSerialCommand(QStringLiteral("S"));
+    if (cap.isOpened() && !kameraTimer->isActive()) {
+        kameraTimer->start(30);
+    }
     ui->lblSystemStatus->setText(QStringLiteral("● Sistem Aktif"));
     ui->lblSystemStatus->setStyleSheet(QStringLiteral(
         "color: #22c55e; background-color: rgba(34, 197, 94, 0.12); "
@@ -293,7 +419,6 @@ void MainWindow::onTestAcceptClicked()
     m_sensorResetTimer->start(1800);
 
     if (!m_serialPort->isOpen()) {
-        // Seri port bağlı değilken de arayüz üzerinden test edilebilmesi için:
         m_acceptedCount++;
         updateCountersUI();
     }
@@ -308,7 +433,6 @@ void MainWindow::onTestRejectClicked()
     m_sensorResetTimer->start(1800);
 
     if (!m_serialPort->isOpen()) {
-        // Seri port bağlı değilken de arayüz üzerinden test edilebilmesi için:
         m_rejectedCount++;
         updateCountersUI();
     }
@@ -318,13 +442,21 @@ void MainWindow::onTestRejectClicked()
 void MainWindow::onBrightnessChanged(int value)
 {
     ui->lblBrightnessValue->setText(QString::number(value));
-    renderVisionFeeds(m_currentDefectState);
+    if (cap.isOpened()) {
+        cap.set(cv::CAP_PROP_BRIGHTNESS, value);
+    } else {
+        renderVisionFeeds(m_currentDefectState);
+    }
 }
 
 void MainWindow::onExposureChanged(int value)
 {
     ui->lblExposureValue->setText(QString::number(value));
-    renderVisionFeeds(m_currentDefectState);
+    if (cap.isOpened()) {
+        cap.set(cv::CAP_PROP_EXPOSURE, value);
+    } else {
+        renderVisionFeeds(m_currentDefectState);
+    }
 }
 
 void MainWindow::triggerInspectionSimulation(bool isDefect)
@@ -358,16 +490,15 @@ void MainWindow::renderVisionFeeds(bool isDefect)
 {
     const int brightnessOffset = ui->sliderBrightness ? (ui->sliderBrightness->value() - 50) / 3 : 0;
 
-    // 1. Ana Kamera Akışı (Live Vision) Görseli
+    // 1. Ana Kamera Akışı: Fiziksel kamera açık değilse simülasyon görüntüsünü çiz
     const QSize camSize = ui->lblCameraFeed->size();
-    if (camSize.width() > 20 && camSize.height() > 20) {
+    if (!cap.isOpened() && camSize.width() > 20 && camSize.height() > 20) {
         QPixmap camPix(camSize);
         camPix.fill(QColor(7, 12, 21));
 
         QPainter p(&camPix);
         p.setRenderHint(QPainter::Antialiasing, true);
 
-        // Endüstriyel optik ızgara çizgileri
         p.setPen(QPen(QColor(30, 50, 80, 90), 1, Qt::DotLine));
         const int step = 32;
         for (int x = step; x < camSize.width(); x += step) {
@@ -377,14 +508,12 @@ void MainWindow::renderVisionFeeds(bool isDefect)
             p.drawLine(0, y, camSize.width(), y);
         }
 
-        // Merkez nişangah (ROI çerçevesi)
         const int cx = camSize.width() / 2;
         const int cy = camSize.height() / 2;
         const int capW = qMin(camSize.width() * 55 / 100, 240);
         const int capH = qMin(camSize.height() * 36 / 100, 96);
         const QRect capRect(cx - capW / 2, cy - capH / 2, capW, capH);
 
-        // Kapsül gövdesi (Sol yarı ve Sağ yarı)
         QPainterPath capsulePath;
         capsulePath.addRoundedRect(capRect, capH / 2.0, capH / 2.0);
         p.save();
@@ -410,16 +539,13 @@ void MainWindow::renderVisionFeeds(bool isDefect)
         rightGrad.setColorAt(1.0, QColor(100, 116, 139));
         p.fillRect(QRect(cx, capRect.top(), capW / 2, capH), rightGrad);
 
-        // Kapsül birleşim çizgisi
         p.setPen(QPen(QColor(15, 23, 42, 180), 2));
         p.drawLine(cx, capRect.top(), cx, capRect.bottom());
 
-        // Parlama efekti
         p.setPen(Qt::NoPen);
         p.setBrush(QColor(255, 255, 255, 70));
         p.drawRoundedRect(capRect.left() + 18, capRect.top() + 10, capW - 36, capH / 5, 6, 6);
 
-        // Hata simülasyonu (Çapak / Kırık izi)
         if (isDefect) {
             const int defectX = cx + capW / 6;
             const int defectY = cy - capH / 8;
@@ -431,18 +557,15 @@ void MainWindow::renderVisionFeeds(bool isDefect)
         }
         p.restore();
 
-        // Kapsül dış konturu
         p.setPen(QPen(QColor(148, 163, 184, 160), 1.5));
         p.setBrush(Qt::NoBrush);
         p.drawRoundedRect(capRect, capH / 2.0, capH / 2.0);
 
-        // AI Bounding Box
         const QRect roiBox = capRect.adjusted(-14, -14, 14, 14);
         const QColor boxColor = isDefect ? QColor(239, 68, 68) : QColor(34, 197, 94);
         p.setPen(QPen(boxColor, 2, Qt::DashLine));
         p.drawRect(roiBox);
 
-        // Bounding Box başlığı
         p.setPen(boxColor);
         p.setFont(QFont(QStringLiteral("Segoe UI"), 9, QFont::Bold));
         const QString tagText = isDefect
@@ -469,14 +592,12 @@ void MainWindow::renderVisionFeeds(bool isDefect)
         const int capH = qMin(heatSize.height() * 40 / 100, 84);
         const QRect capRect(cx - capW / 2, cy - capH / 2, capW, capH);
 
-        // Soğuk arka plan gradyanı
         QRadialGradient bgGrad(QPointF(cx, cy), qMax(heatSize.width(), heatSize.height()) * 0.6);
         bgGrad.setColorAt(0.0, QColor(29, 78, 216, 110));
         bgGrad.setColorAt(0.6, QColor(30, 58, 138, 70));
         bgGrad.setColorAt(1.0, QColor(7, 12, 21, 255));
         hp.fillRect(heatPix.rect(), bgGrad);
 
-        // Kapsül termal/aktivasyon haritası
         QPainterPath capsulePath;
         capsulePath.addRoundedRect(capRect, capH / 2.0, capH / 2.0);
         hp.save();
@@ -500,7 +621,6 @@ void MainWindow::renderVisionFeeds(bool isDefect)
         }
         hp.restore();
 
-        // Kapsül konturu ve anomali odak halkası
         hp.setPen(QPen(QColor(125, 211, 252, 150), 1.5));
         hp.setBrush(Qt::NoBrush);
         hp.drawRoundedRect(capRect, capH / 2.0, capH / 2.0);

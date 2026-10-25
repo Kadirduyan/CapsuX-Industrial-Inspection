@@ -6,6 +6,7 @@
 #include <QSerialPortInfo>
 #include <QTimer>
 #include <QByteArray>
+#include <opencv2/opencv.hpp>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -25,6 +26,8 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
 
 private slots:
+    void kameraKaresiniGuncelle();
+    void onCameraSelectionChanged(int comboIndex);
     void updateDateTime();
     void refreshSerialPorts();
     void toggleSerialConnection();
@@ -42,6 +45,7 @@ private slots:
     void onExposureChanged(int value);
 
 private:
+    bool kamerayiAc(int cameraIndex);
     void processSerialLine(const QString &line);
     void sendSerialCommand(const QString &command);
     void updateCountersUI();
@@ -49,6 +53,8 @@ private:
     void renderVisionFeeds(bool isDefect);
 
     Ui::MainWindow *ui;
+    cv::VideoCapture cap;
+    QTimer *kameraTimer;
     QSerialPort *m_serialPort;
     QTimer *m_clockTimer;
     QTimer *m_sensorResetTimer;
